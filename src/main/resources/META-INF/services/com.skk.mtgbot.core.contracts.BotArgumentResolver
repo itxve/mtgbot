@@ -1,0 +1,8 @@
+com.skk.mtgbot.core.contracts.impl.MessageArgumentResolver
+com.skk.mtgbot.core.contracts.impl.CallbackQueryArgumentResolver
+com.skk.mtgbot.core.contracts.impl.InlineQueryArgumentResolver
+com.skk.mtgbot.core.contracts.impl.WebAppDataArgumentResolver
+com.skk.mtgbot.core.contracts.impl.BatchedMediaGroupArgumentResolver
+com.skk.mtgbot.core.contracts.impl.MatcherArgumentResolver
+com.skk.mtgbot.core.contracts.impl.UpdateArgumentResolver
+com.skk.mtgbot.core.contracts.impl.StringArgumentResolver
