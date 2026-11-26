@@ -3,6 +3,55 @@
 基于 Spring Boot 和 long polling 的 Telegram Bot 核心库。通过 `@BotController` 注册控制器，并用 `@ChatMapping`
 将消息或其他更新映射到处理方法。
 
+## 通过 JitPack 引入
+
+先在 GitHub 仓库创建并推送一个 release tag（例如 `v0.0.1`），然后在使用方项目中添加 JitPack 仓库和依赖。版本号使用实际发布的 tag。
+
+### Maven
+
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>com.github.itxve</groupId>
+        <artifactId>mtgbot</artifactId>
+        <version>v0.0.1</version>
+    </dependency>
+</dependencies>
+```
+
+### Gradle (Groovy)
+
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'com.github.itxve:mtgbot:v0.0.1'
+}
+```
+
+### Gradle (Kotlin DSL)
+
+```kotlin
+repositories {
+    maven { url = uri("https://jitpack.io") }
+}
+
+dependencies {
+    implementation("com.github.itxve:mtgbot:v0.0.1")
+}
+```
+
+示例中的 `v0.0.1` 是版本格式示意；请确保仓库中存在对应的 Git tag / GitHub release。首次请求该版本时，JitPack 会尝试构建仓库。
+
 ## 基本用法
 
 控制器需要是 Spring Bean。`@BotController` 已包含 `@Component`，处理方法可接收框架支持的参数类型。
