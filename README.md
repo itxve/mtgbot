@@ -64,6 +64,9 @@ import com.skk.mtgbot.annotation.BotController;
 import com.skk.mtgbot.annotation.ChatMapping;
 import com.skk.mtgbot.core.ChatType;
 import com.skk.mtgbot.core.MsgUpdateType;
+import java.util.regex.Matcher;
+
+import java.util.regex.Matcher;
 
 @BotController
 public class ExampleController {
@@ -97,8 +100,18 @@ public class ExampleController {
     public void weather(String query) {
         System.out.println("Inline query：" + query);
     }
+
+    // 消息例如：/search blue eyes；通过捕获组读取搜索关键词
+    @ChatMapping(value = "^/search\\s+(.+)$")
+    public void search(Matcher matcher) {
+        if (matcher != null) {
+            String keyword = matcher.group(1);
+            System.out.println("搜索关键词：" + keyword);
+        }
+    }
 }
 ```
+`Matcher` 参数使用与 `@ChatMapping` 相同的正则和当前更新文本。框架在分发前已用 `matches()` 确认整条文本匹配；无法匹配时不会调用处理方法。`group(0)` 是完整匹配内容，`group(1)` 对应正则里的第一个括号，后续捕获组依此类推。
 
 ## 媒体组和 caption
 
@@ -126,6 +139,53 @@ public void photos(BatchedMediaGroup group) {
 
 方法参数解析支持 `String`、Telegram SDK 的 `Update`、`Message`、`CallbackQuery`、`InlineQuery`、Web App data 对象，以及媒体组的
 `BatchedMediaGroup`。不支持的参数类型会被传入 `null`。
+
+### 自定义 `BotArgumentResolver`
+
+实现 `BotArgumentResolver` 并注册为 Spring Bean，即可为控制器方法增加自定义参数类型。下面的例子将 `/hello Alice` 中的名字解析为 `Greeting`：
+
+```java
+public record Greeting(String name) {}
+```
+
+```java
+import com.pengrad.telegrambot.model.Update;
+import com.skk.mtgbot.core.BotHandlerMapping;
+import com.skk.mtgbot.core.MethodParameter;
+import com.skk.mtgbot.core.contracts.BotArgumentResolver;
+import org.springframework.stereotype.Component;
+
+@Component
+public class GreetingArgumentResolver implements BotArgumentResolver {
+
+    @Override
+    public boolean supports(MethodParameter parameter) {
+        return parameter.getParameterType() == Greeting.class;
+    }
+
+    @Override
+    public Object resolve(Update update, MethodParameter parameter, BotHandlerMapping mapping) {
+        String text = mapping.resolveTextAsString(update);
+        if (text == null || !text.startsWith("/hello ")) {
+            return null;
+        }
+        return new Greeting(text.substring("/hello ".length()));
+    }
+}
+```
+
+```java
+@BotController
+public class GreetingController {
+
+    @ChatMapping(value = "^/hello\\s+.+$")
+    public void hello(Greeting greeting) {
+        System.out.println("你好，" + greeting.name());
+    }
+}
+```
+
+`supports` 用于声明 resolver 负责的参数类型；`resolve` 返回该参数的值。框架会自动发现 Spring Bean。也可以实现 `BotArgumentResolverConfigurer` 并在 `configure(BotArgumentResolverRegistry registry)` 中调用 `registry.add(...)` 注册 resolver。多个 resolver 都支持同一参数时，`getOrder()` 数值较小的先尝试；默认值为 `0`。
 
 处理方法目前由 dispatcher 调用；如需给用户回复，请在方法中注入并使用 Telegram Bot API。应用还需启用项目的自动配置并提供 Bot
 token 配置。
