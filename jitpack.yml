@@ -1,0 +1,8 @@
+jdk:
+  - openjdk-8
+
+before_install:
+  - echo "Forcing Maven Central mirror..."
+
+install:
+  - mvn clean install -DskipTests -Dmaven.repo.local=$HOME/.m2/repository -Dhttps.protocols=TLSv1.2
