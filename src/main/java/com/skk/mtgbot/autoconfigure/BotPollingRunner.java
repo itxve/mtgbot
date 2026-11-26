@@ -7,10 +7,11 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.utility.BotUtils;
 import com.skk.mtgbot.core.BotDispatcher;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.CommandLineRunner;
+
+import javax.annotation.PostConstruct;
 
 @Slf4j
-public class BotPollingRunner implements CommandLineRunner {
+public class BotPollingRunner {
 
     private final TelegramBot bot;
     private final BotDispatcher dispatcher;
@@ -20,8 +21,8 @@ public class BotPollingRunner implements CommandLineRunner {
         this.dispatcher = dispatcher;
     }
 
-    @Override
-    public void run(String... args) {
+    @PostConstruct
+    public void run() {
         log.info("BotPollingRunner Listening......");
         bot.setUpdatesListener(updates -> {
             for (Update update : updates) {

@@ -14,14 +14,9 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan("com.skk.mtgbot")
 public class TelbotAutoConfiguration {
 
-    private final TgBotProperties properties;
-
-    public TelbotAutoConfiguration(TgBotProperties properties) {
-        this.properties = properties;
-    }
-
+   
     @Bean
-    public TelegramBot telegramBot() {
+    public TelegramBot telegramBot(TgBotProperties properties) {
         return new TelegramBot.Builder(properties.getToken())
                 .build();
     }

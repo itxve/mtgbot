@@ -1,4 +1,4 @@
-# mtgbot (方便给人使用)
+# mtgbot
 
 基于 Spring Boot 和 long polling 的 Telegram Bot 核心库。通过 `@BotController` 注册控制器，并用 `@ChatMapping`
 将消息或其他更新映射到处理方法。
