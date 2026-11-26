@@ -5,11 +5,13 @@
 
 ## 通过 JitPack 引入
 
-先在 GitHub 仓库创建并推送一个 release tag（例如 `v0.0.1`），然后在使用方项目中添加 JitPack 仓库和依赖。版本号使用实际发布的 tag。
+先在 GitHub 仓库创建并推送一个 release tag（例如 `v0.0.1`），然后在使用方项目中添加 JitPack 仓库和依赖。版本号使用实际发布的
+tag。
 
 ### Maven
 
 ```xml
+
 <repositories>
     <repository>
         <id>jitpack.io</id>
@@ -18,11 +20,11 @@
 </repositories>
 
 <dependencies>
-    <dependency>
-        <groupId>com.github.itxve</groupId>
-        <artifactId>mtgbot</artifactId>
-        <version>v0.0.1</version>
-    </dependency>
+<dependency>
+    <groupId>com.github.itxve</groupId>
+    <artifactId>mtgbot</artifactId>
+    <version>v0.0.1</version>
+</dependency>
 </dependencies>
 ```
 
@@ -34,7 +36,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.itxve:mtgbot:v0.0.1'
+    implementation 'com.github.itxve:mtgbot:0.0.3'
 }
 ```
 
@@ -46,11 +48,11 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.itxve:mtgbot:v0.0.1")
+    implementation("com.github.itxve:mtgbot:0.0.3")
 }
 ```
 
-示例中的 `v0.0.1` 是版本格式示意；请确保仓库中存在对应的 Git tag / GitHub release。首次请求该版本时，JitPack 会尝试构建仓库。
+示例中的 `0.0.3` 是版本格式示意；请确保仓库中存在对应的 Git tag / GitHub release。首次请求该版本时，JitPack 会尝试构建仓库。
 
 ## 基本用法
 

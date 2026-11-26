@@ -6,7 +6,7 @@
 
     <groupId>com.skk</groupId>
     <artifactId>mtgbot</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.3</version>
     <name>mtgbot</name>
     <description>mtgbot core (no web)</description>
     <packaging>jar</packaging>
