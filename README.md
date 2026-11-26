@@ -54,27 +54,48 @@ dependencies {
 
 示例中的 `0.0.3` 是版本格式示意；请确保仓库中存在对应的 Git tag / GitHub release。首次请求该版本时，JitPack 会尝试构建仓库。
 
+### Spring Boot 配置
+
+在应用的 `src/main/resources/application.yml` 中配置 Bot token。配置 `tg.bot.token` 后，自动配置会创建 Telegram Bot 并启动 long polling；媒体组聚合等待时间可通过 `media-group-flush-delay-ms` 调整，默认值为 `1500` 毫秒。
+
+```yaml
+tg:
+  bot:
+    token: ${TG_BOT_TOKEN}
+    media-group-flush-delay-ms: 1500
+```
+
+将真实 token 放在环境变量 `TG_BOT_TOKEN` 中，避免把凭证提交到代码仓库。
+
 ## 基本用法
 
 控制器需要是 Spring Bean。`@BotController` 已包含 `@Component`，处理方法可接收框架支持的参数类型。
 
 ```java
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.request.SendMessage;
 import com.skk.mtgbot.annotation.BotController;
 import com.skk.mtgbot.annotation.ChatMapping;
 import com.skk.mtgbot.core.ChatType;
 import com.skk.mtgbot.core.MsgUpdateType;
 import java.util.regex.Matcher;
 
-import java.util.regex.Matcher;
-
 @BotController
 public class ExampleController {
+
+    private final TelegramBot bot;
+
+    public ExampleController(TelegramBot bot) {
+        this.bot = bot;
+    }
 
     // 私聊中发送 /start 时触发
     @ChatMapping(value = "^/start$", chatTypes = ChatType.Private)
     public void start(String text, Update update) {
-        System.out.println("收到 " + text + "，chatId=" + update.message().chat().id());
+        long chatId = update.message().chat().id();
+        System.out.println("收到 " + text + "，chatId=" + chatId);
+        bot.execute(new SendMessage(chatId, "你好，欢迎使用机器人！"));
     }
 
     // /echo 后面的文字也属于匹配文本；String 参数接收完整消息
@@ -111,7 +132,11 @@ public class ExampleController {
     }
 }
 ```
-`Matcher` 参数使用与 `@ChatMapping` 相同的正则和当前更新文本。框架在分发前已用 `matches()` 确认整条文本匹配；无法匹配时不会调用处理方法。`group(0)` 是完整匹配内容，`group(1)` 对应正则里的第一个括号，后续捕获组依此类推。
+
+上面的 `/start` 处理方法展示了回复消息的基本方式：注入自动配置创建的 `TelegramBot`，再用 `SendMessage` 和当前消息的 `chatId` 发送文本。
+
+`Matcher` 参数使用与 `@ChatMapping` 相同的正则和当前更新文本。框架在分发前已用 `matches()` 确认整条文本匹配；无法匹配时不会调用处理方法。
+`group(0)` 是完整匹配内容，`group(1)` 对应正则里的第一个括号，后续捕获组依此类推。
 
 ## 媒体组和 caption
 
@@ -142,7 +167,8 @@ public void photos(BatchedMediaGroup group) {
 
 ### 自定义 `BotArgumentResolver`
 
-实现 `BotArgumentResolver` 并注册为 Spring Bean，即可为控制器方法增加自定义参数类型。下面的例子将 `/hello Alice` 中的名字解析为 `Greeting`：
+实现 `BotArgumentResolver` 并注册为 Spring Bean，即可为控制器方法增加自定义参数类型。下面的例子将 `/hello Alice` 中的名字解析为
+`Greeting`：
 
 ```java
 public record Greeting(String name) {}
@@ -175,6 +201,7 @@ public class GreetingArgumentResolver implements BotArgumentResolver {
 ```
 
 ```java
+
 @BotController
 public class GreetingController {
 
@@ -185,7 +212,9 @@ public class GreetingController {
 }
 ```
 
-`supports` 用于声明 resolver 负责的参数类型；`resolve` 返回该参数的值。框架会自动发现 Spring Bean。也可以实现 `BotArgumentResolverConfigurer` 并在 `configure(BotArgumentResolverRegistry registry)` 中调用 `registry.add(...)` 注册 resolver。多个 resolver 都支持同一参数时，`getOrder()` 数值较小的先尝试；默认值为 `0`。
+`supports` 用于声明 resolver 负责的参数类型；`resolve` 返回该参数的值。框架会自动发现 Spring Bean。也可以实现
+`BotArgumentResolverConfigurer` 并在 `configure(BotArgumentResolverRegistry registry)` 中调用 `registry.add(...)` 注册
+resolver。多个 resolver 都支持同一参数时，`getOrder()` 数值较小的先尝试；默认值为 `0`。
 
 处理方法目前由 dispatcher 调用；如需给用户回复，请在方法中注入并使用 Telegram Bot API。应用还需启用项目的自动配置并提供 Bot
 token 配置。
